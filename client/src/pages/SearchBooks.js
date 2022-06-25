@@ -36,14 +36,16 @@ const SearchBooks = () => {
       }
 
       const { items } = await response.json();
-
+      // console.log(items);
       const bookData = items.map((book) => ({
         bookId: book.id,
         authors: book.volumeInfo.authors || ['No author to display'],
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
+        link: book.selfLink
       }));
+      console.log(bookData);
 
       setSearchedBooks(bookData);
       setSearchInput('');

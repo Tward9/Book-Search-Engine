@@ -35,7 +35,16 @@ const resolvers = {
 
             return { token, user };
         },
-
+        saveBook: async (parent, { username, saveBookInput }) => {
+            await User.findOneAndUpdate(
+                { username: username },
+                { $addToSet: { savedBooks: saveBookInput } },
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            )
+        }
     },
 };
 
