@@ -41,10 +41,16 @@ const SavedBooks = () => {
   // }, [userDataLength]);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
-  const userData = useQuery(GET_ME, {
-    variables: {username: Auth.getProfile().data.username}
+  console.log(Auth.getProfile().data.username);
+  const { loading, data } = useQuery(GET_ME, {
+    variables: {username: Auth.getProfile().data.username},
   })
-  const [deleteBook, {error, data}] = useMutation(REMOVE_BOOK);
+  console.log(useQuery(GET_ME, {
+    variables: {username: Auth.getProfile().data.username},
+  }));
+  const user = data?.me || {};
+
+  const [deleteBook, {error, bookData}] = useMutation(REMOVE_BOOK);
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -62,7 +68,7 @@ const SavedBooks = () => {
       // const updatedUser = await response.json();
       // setUserData(updatedUser);
       // // upon success, remove book's id from localStorage
-      const { data } = await deleteBook({
+      const { bookData } = await deleteBook({
         variables: { username: Auth.getProfile().data.username, bookId: bookId }
       });
       removeBookId(bookId);
@@ -72,10 +78,10 @@ const SavedBooks = () => {
   };
 
   // if data isn't here yet, say so
-  if (!userData) {
+  if (!user) {
     return <h2>LOADING...</h2>;
   }
-
+  console.log(user);
   return (
     <>
       <Jumbotron fluid className='text-light bg-dark'>
@@ -85,12 +91,12 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
+          {user.savedBooks.length
+            ? `Viewing ${user.savedBooks.length} saved ${user.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {user.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
