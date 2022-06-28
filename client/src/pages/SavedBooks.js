@@ -5,7 +5,7 @@ import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 import { useQuery } from '@apollo/client';
-import {GET_ME} from '../utils/queries';
+import { GET_ME } from '../utils/queries';
 import { useMutation } from '@apollo/client';
 import { REMOVE_BOOK } from '../utils/mutations';
 
@@ -43,14 +43,14 @@ const SavedBooks = () => {
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   console.log(Auth.getProfile().data.username);
   const { loading, data } = useQuery(GET_ME, {
-    variables: {username: Auth.getProfile().data.username},
+    variables: { username: Auth.getProfile().data.username },
   })
-  console.log(useQuery(GET_ME, {
-    variables: {username: Auth.getProfile().data.username},
-  }));
+  // console.log(useQuery(GET_ME, {
+  //   variables: {username: Auth.getProfile().data.username},
+  // }));
   const user = data?.me || {};
 
-  const [deleteBook, {error, bookData}] = useMutation(REMOVE_BOOK);
+  const [deleteBook, { error, bookData }] = useMutation(REMOVE_BOOK);
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -78,43 +78,47 @@ const SavedBooks = () => {
   };
 
   // if data isn't here yet, say so
-  if (!user) {
+  if (loading) {
     return <h2>LOADING...</h2>;
-  }
-  console.log(user);
-  return (
-    <>
-      <Jumbotron fluid className='text-light bg-dark'>
+  } else {
+    return (
+      <>
+        <Jumbotron fluid className='text-light bg-dark'>
+          <Container>
+            <h1>Viewing saved books!</h1>
+          </Container>
+        </Jumbotron>
         <Container>
-          <h1>Viewing saved books!</h1>
+          <h2>
+            {user.savedBooks.length
+              ? `Viewing ${user.savedBooks.length} saved ${user.savedBooks.length === 1 ? 'book' : 'books'}:`
+              : 'You have no saved books!'}
+          </h2>
+          <CardColumns>
+            {user.savedBooks.map((book) => {
+              return (
+                <Card key={book.bookId} border='dark'>
+                  {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
+                  <Card.Body>
+                    <Card.Title>{book.title}</Card.Title>
+                    <p className='small'>Authors: {book.authors}</p>
+                    <Card.Text>{book.description}</Card.Text>
+                    <Button className='btn-block btn-danger' onClick={() => handleDeleteBook(book.bookId)}>
+                      Delete this Book!
+                    </Button>
+                  </Card.Body>
+                </Card>
+              );
+            })}
+          </CardColumns>
         </Container>
-      </Jumbotron>
-      <Container>
-        <h2>
-          {user.savedBooks.length
-            ? `Viewing ${user.savedBooks.length} saved ${user.savedBooks.length === 1 ? 'book' : 'books'}:`
-            : 'You have no saved books!'}
-        </h2>
-        <CardColumns>
-          {user.savedBooks.map((book) => {
-            return (
-              <Card key={book.bookId} border='dark'>
-                {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
-                <Card.Body>
-                  <Card.Title>{book.title}</Card.Title>
-                  <p className='small'>Authors: {book.authors}</p>
-                  <Card.Text>{book.description}</Card.Text>
-                  <Button className='btn-block btn-danger' onClick={() => handleDeleteBook(book.bookId)}>
-                    Delete this Book!
-                  </Button>
-                </Card.Body>
-              </Card>
-            );
-          })}
-        </CardColumns>
-      </Container>
-    </>
-  );
-};
+      </>
+    );
+  };
+}
 
 export default SavedBooks;
+/*
+
+        
+*/
